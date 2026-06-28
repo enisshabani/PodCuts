@@ -1,0 +1,13 @@
+[build]
+  # Tell Netlify that the React app is inside the "frontend" folder
+  base = "frontend"
+  # The folder that Vite generates when it builds
+  publish = "dist"
+  # The command to build the app
+  command = "npm run build"
+
+# This ensures that if you ever add multiple pages/routes, Netlify won't throw 404s
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

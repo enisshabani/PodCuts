@@ -1,21 +1,17 @@
 import os
-import uuid
-import json
-from typing import Optional
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+import re
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import yt_dlp
 import asyncio
 from dotenv import load_dotenv
 from google import genai
-from google.genai import types
+from youtube_transcript_api import YouTubeTranscriptApi
 
 load_dotenv()
 
-app = FastAPI(title="PodCuts AI Summarizer")
+app = FastAPI(title="PodCuts AI Summarizer V2")
 
-# Allow CORS for frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -29,112 +25,85 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY or GEMINI_API_KEY == "your_gemini_api_key_here":
     print("WARNING: GEMINI_API_KEY is not set or is still the default value.")
 
-# Initialize Gemini Client
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 class SummarizeRequest(BaseModel):
     url: str
+    format: str = "Bullet Points"
+    language: str = "English"
 
 class SummarizeResponse(BaseModel):
     summary: str
     transcript: str
+    video_id: str
 
-class GeminiSchema(BaseModel):
-    transcript: str
-    summary: str
+def get_video_id(url: str) -> str:
+    match = re.search(r"(?:v=|\/)([0-9A-Za-z_-]{11}).*", url)
+    if not match:
+        raise ValueError("Invalid YouTube URL. Please provide a standard YouTube video link.")
+    return match.group(1)
 
-def download_audio(url: str, temp_dir: str = "temp") -> str:
-    """Downloads audio from a given URL using yt-dlp."""
-    if not os.path.exists(temp_dir):
-        os.makedirs(temp_dir)
-    
-    file_id = str(uuid.uuid4())
-    output_path = os.path.join(temp_dir, f"{file_id}.%(ext)s")
-    
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'outtmpl': output_path,
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-        }],
-        'quiet': True,
-    }
-    
+def format_timestamp(seconds: float) -> str:
+    m = int(seconds // 60)
+    s = int(seconds % 60)
+    return f"[{m:02d}:{s:02d}]"
+
+def fetch_transcript_text(video_id: str) -> str:
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(url, download=True)
-            # Find the downloaded file
-            expected_file = os.path.join(temp_dir, f"{file_id}.mp3")
-            if os.path.exists(expected_file):
-                 return expected_file
-            
-            # fallback
-            for f in os.listdir(temp_dir):
-                if f.startswith(file_id):
-                    return os.path.join(temp_dir, f)
-            raise Exception("Downloaded file not found.")
-    except Exception as e:
-        raise Exception(f"Failed to download audio: {e}")
-
-async def process_with_gemini(audio_path: str) -> GeminiSchema:
-    """Uploads the audio to Gemini and requests a transcript + summary in one pass."""
-    audio_file = None
-    try:
-        # Note: We must use a thread to upload/generate since the SDK operations are synchronous
-        print(f"Uploading {audio_path} to Gemini...")
-        audio_file = await asyncio.to_thread(client.files.upload, file=audio_path)
+        api = YouTubeTranscriptApi()
+        fetched_transcript = api.fetch(video_id)
         
+        # Inject timestamps into the text every few seconds so Gemini has context
+        lines = []
+        for snippet in fetched_transcript.snippets:
+            time_str = format_timestamp(snippet.start)
+            clean_text = snippet.text.replace('\n', ' ')
+            lines.append(f"{time_str} {clean_text}")
+            
+        return " ".join(lines)
+    except Exception as e:
+        raise Exception(f"Could not fetch transcript for video: {e}")
+
+async def process_with_gemini(transcript: str, output_format: str, language: str) -> str:
+    """Summarizes the transcript using Gemini with custom constraints."""
+    try:
         prompt = (
-            "Listen to this audio. First, provide a complete, verbatim transcript of the audio. "
-            "Then, provide a concise, structured summary of the content in bullet points. "
-            "Maintain the chronological flow for the summary. "
-            "Return the result exactly matching the JSON schema provided."
+            f"You are an expert summarizer and content creator. "
+            f"Please summarize the following video transcript according to these strict rules:\n\n"
+            f"1. **Language**: Write the entire response fluently in {language}.\n"
+            f"2. **Format**: Format your response exactly as: {output_format}.\n"
+            f"3. **Timestamps**: The transcript has `[MM:SS]` timestamps injected into it. Whenever you mention a key point, quote, or transition, you MUST cite the relevant timestamp exactly as it appears in the text (e.g., `[04:20]`).\n"
+            f"4. **Syntax**: Use standard Markdown formatting.\n\n"
+            f"--- TRANSCRIPT ---\n"
+            f"{transcript}"
         )
         
-        print("Generating content with gemini-2.5-flash...")
         response = await asyncio.to_thread(
             client.models.generate_content,
             model='gemini-2.5-flash',
-            contents=[audio_file, prompt],
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=GeminiSchema,
-            )
+            contents=prompt,
         )
         
-        # The response text will be a JSON string matching GeminiSchema
-        result_json = json.loads(response.text)
-        return GeminiSchema(**result_json)
+        return response.text
         
     except Exception as e:
         raise Exception(f"Gemini processing failed: {e}")
-    finally:
-        # Ensure we delete the file from Gemini to save space/cost
-        if audio_file:
-            try:
-                print(f"Cleaning up file {audio_file.name} from Gemini...")
-                await asyncio.to_thread(client.files.delete, name=audio_file.name)
-            except Exception as cleanup_error:
-                print(f"Warning: Failed to clean up Gemini file: {cleanup_error}")
 
 @app.post("/api/summarize", response_model=SummarizeResponse)
 async def summarize_endpoint(request: SummarizeRequest):
     try:
-        # 1. Download Audio locally
-        print(f"Downloading audio from {request.url}...")
-        audio_file_path = await asyncio.to_thread(download_audio, request.url)
+        video_id = get_video_id(request.url)
+        print(f"Fetching subtitles for video {video_id}...")
         
-        # 2. Process with Gemini
-        gemini_result = await process_with_gemini(audio_file_path)
+        transcript = await asyncio.to_thread(fetch_transcript_text, video_id)
         
-        # 3. Clean up the local audio file
-        if os.path.exists(audio_file_path):
-            os.remove(audio_file_path)
-            
+        print(f"Summarizing transcript via Gemini (Format: {request.format}, Lang: {request.language})...")
+        summary = await process_with_gemini(transcript, request.format, request.language)
+        
         return SummarizeResponse(
-            summary=gemini_result.summary,
-            transcript=gemini_result.transcript
+            summary=summary,
+            transcript=transcript,
+            video_id=video_id
         )
     except Exception as e:
         print(f"Error: {str(e)}")
