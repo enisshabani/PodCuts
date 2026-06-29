@@ -9,7 +9,8 @@ from pydantic import BaseModel
 from typing import Optional, List, Dict
 from dotenv import load_dotenv
 from google import genai
-from youtube_transcript_api import YouTubeTranscriptApi
+import yt_dlp
+import requests
 
 load_dotenv()
 
@@ -54,15 +55,58 @@ def format_timestamp(seconds: float) -> str:
 
 def fetch_transcript_text(video_id: str) -> str:
     try:
-        fetched_transcript = YouTubeTranscriptApi.get_transcript(video_id)
-        
-        lines = []
-        for snippet in fetched_transcript:
-            time_str = format_timestamp(snippet['start'])
-            clean_text = snippet['text'].replace('\n', ' ')
-            lines.append(f"{time_str} {clean_text}")
+        url = f"https://www.youtube.com/watch?v={video_id}"
+        ydl_opts = {
+            'skip_download': True,
+            'writesubtitles': True,
+            'writeautomaticsub': True,
+            'subtitleslangs': ['all'],
+            'quiet': True,
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            subs = info.get('requested_subtitles')
+            if not subs:
+                raise Exception("Subtitles are disabled or not available for this video.")
             
-        return " ".join(lines)
+            sub_info = None
+            for lang in ['en', 'en-US', 'en-GB', 'en-orig']:
+                if lang in subs:
+                    sub_info = subs[lang]
+                    break
+            
+            if not sub_info:
+                sub_info = list(subs.values())[0]
+                
+            sub_url = sub_info['url']
+            if '&fmt=vtt' in sub_url:
+                sub_url = sub_url.replace('&fmt=vtt', '&fmt=json3')
+            elif '&fmt=' not in sub_url:
+                sub_url += '&fmt=json3'
+                
+            res = requests.get(sub_url)
+            res.raise_for_status()
+            data = res.json()
+            
+            lines = []
+            events = data.get('events', [])
+            for event in events:
+                if 'segs' not in event:
+                    continue
+                
+                start_sec = event.get('tStartMs', 0) / 1000.0
+                time_str = format_timestamp(start_sec)
+                
+                text_parts = [seg.get('utf8', '') for seg in event['segs']]
+                clean_text = "".join(text_parts).replace('\n', ' ').strip()
+                
+                if clean_text:
+                    lines.append(f"{time_str} {clean_text}")
+                    
+            if not lines:
+                raise Exception("Transcript is empty.")
+                
+            return " ".join(lines)
     except Exception as e:
         raise Exception(f"Could not fetch transcript for video: {e}")
 
