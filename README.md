@@ -1,23 +1,23 @@
-# PodCuts 🎙️✂️
+# PodCuts
 
 PodCuts is a lightning-fast, full-stack AI web application that instantly extracts closed captions from YouTube videos and uses Google's multimodal **Gemini 2.5 Flash** model to generate structured, chronological summaries in seconds.
 
 No video downloading required!
 
-## ✨ Features
+## Features
 - **Instant Subtitle Extraction**: Bypasses heavy video downloading by directly scraping YouTube closed captions via `youtube-transcript-api`.
 - **Gemini Powered**: Leverages Google's Gemini 2.5 Flash model for lightning-fast, intelligent summarization.
 - **Split-Screen UI**: A premium, glassmorphism-styled React frontend that displays the raw transcript side-by-side with the AI summary for easy cross-referencing.
 - **Copy to Clipboard**: One-click copying of the generated summary.
 
-## 🏗️ Architecture
+## Architecture
 - **Frontend**: React + Vite (Vanilla CSS with Glassmorphism aesthetic)
 - **Backend**: Python + FastAPI
 - **AI/LLM**: Google GenAI SDK (`gemini-2.5-flash`)
 
 ---
 
-## 🚀 Getting Started (Local Development)
+## Getting Started (Local Development)
 
 Because this app uses the Gemini API, you will need to supply your own API key to run it locally. 
 
@@ -66,7 +66,7 @@ npm run dev
 
 ---
 
-## 💡 Usage
+## Usage
 1. Open your browser to the local Vite URL.
 2. Paste any YouTube video link (ensure the video has closed captions enabled).
 3. Hit **Summarize** and watch the AI generate the transcript and key takeaways instantly!
