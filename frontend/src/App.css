@@ -1,8 +1,8 @@
 .app-container {
   width: 100%;
-  max-width: 1300px;
+  max-width: 1800px; /* Increased from 1300px so it stretches wider */
   margin: 2rem auto;
-  padding: 2rem;
+  padding: 1rem 2rem;
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -15,9 +15,7 @@
 .header h1 {
   font-size: 3rem;
   font-weight: 800;
-  background: linear-gradient(to right, #60a5fa, #a78bfa);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
 }
 
@@ -71,7 +69,9 @@
   height: 100%;
   justify-content: center;
   align-items: stretch;
+
 }
+
 
 .input-group {
   display: flex;
@@ -91,15 +91,15 @@
   flex: 1;
   padding: 0.9rem 1.2rem;
   border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background-color: rgba(30, 41, 59, 0.5);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  border: 1px solid var(--border-color);
+  background-color: var(--input-bg);
+  background-image: var(--select-bg-image);
   background-repeat: no-repeat;
   background-position: right 1rem center;
   background-size: 1.2rem;
   appearance: none;
   -webkit-appearance: none;
-  color: #e2e8f0;
+  color: var(--text-primary);
   font-size: 0.95rem;
   font-weight: 500;
   outline: none;
@@ -110,19 +110,19 @@
 }
 
 .select-input:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-  background-color: rgba(30, 41, 59, 0.7);
+  border-color: var(--accent-color);
+  background-color: var(--input-bg-hover);
   transform: translateY(-1px);
 }
 
 .select-input:focus {
-  border-color: #60a5fa;
-  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.25);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(204, 213, 174, 0.5);
 }
 
 .select-input option {
-  background-color: #0f172a;
-  color: #e2e8f0;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
   padding: 0.5rem;
 }
 
@@ -131,7 +131,7 @@
   padding: 1rem 1.5rem;
   border-radius: 1rem;
   border: 1px solid var(--border-color);
-  background: rgba(15, 23, 42, 0.5);
+  background: var(--input-bg);
   color: var(--text-primary);
   font-size: 1rem;
   outline: none;
@@ -140,7 +140,7 @@
 
 .url-input:focus {
   border-color: var(--accent-color);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 0 2px rgba(204, 213, 174, 0.5);
 }
 
 .submit-btn {
@@ -148,7 +148,7 @@
   border-radius: 1rem;
   border: none;
   background: var(--accent-color);
-  color: white;
+  color: var(--text-primary);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -231,11 +231,11 @@
 
 .summary-card h2 {
   font-size: 1.5rem;
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 
 .copy-btn {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--copy-btn-bg);
   border: 1px solid var(--border-color);
   color: var(--text-secondary);
   padding: 0.4rem 0.8rem;
@@ -249,13 +249,13 @@
 }
 
 .copy-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--copy-btn-hover);
   color: var(--text-primary);
 }
 
 .summary-content {
   line-height: 1.8;
-  color: #cbd5e1;
+  color: var(--text-primary);
 }
 
 .summary-content ul, .summary-content ol {
@@ -268,9 +268,9 @@
 }
 
 .timestamp-link {
-  background: rgba(59, 130, 246, 0.2);
-  color: #60a5fa;
-  border: 1px solid rgba(59, 130, 246, 0.4);
+  background: var(--timestamp-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--accent-color);
   padding: 0.1rem 0.4rem;
   border-radius: 0.4rem;
   font-family: monospace;
@@ -281,8 +281,8 @@
 }
 
 .timestamp-link:hover {
-  background: rgba(59, 130, 246, 0.4);
-  color: #fff;
+  background: var(--accent-hover);
+  color: var(--text-primary);
 }
 
 .error-message {
