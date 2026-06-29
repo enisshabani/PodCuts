@@ -96,7 +96,9 @@ function App() {
             try {
               const data = JSON.parse(dataStr);
               if (data.status === 'error') {
-                throw new Error(data.message);
+                setError(data.message);
+                setIsLoading(false);
+                return;
               } else if (data.status === 'complete') {
                 setResult(data);
                 setIsLoading(false);

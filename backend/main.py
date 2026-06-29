@@ -54,13 +54,12 @@ def format_timestamp(seconds: float) -> str:
 
 def fetch_transcript_text(video_id: str) -> str:
     try:
-        api = YouTubeTranscriptApi()
-        fetched_transcript = api.fetch(video_id)
+        fetched_transcript = YouTubeTranscriptApi.get_transcript(video_id)
         
         lines = []
-        for snippet in fetched_transcript.snippets:
-            time_str = format_timestamp(snippet.start)
-            clean_text = snippet.text.replace('\n', ' ')
+        for snippet in fetched_transcript:
+            time_str = format_timestamp(snippet['start'])
+            clean_text = snippet['text'].replace('\n', ' ')
             lines.append(f"{time_str} {clean_text}")
             
         return " ".join(lines)
