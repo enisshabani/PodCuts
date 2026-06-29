@@ -237,7 +237,7 @@
 .copy-btn {
   background: var(--copy-btn-bg);
   border: 1px solid var(--border-color);
-  color: var(--text-secondary);
+  color: var(--text-primary);
   padding: 0.4rem 0.8rem;
   border-radius: 0.5rem;
   cursor: pointer;
@@ -292,4 +292,41 @@
   border-radius: 0.75rem;
   text-align: center;
   border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* FILE UPLOAD CSS */
+.file-upload-wrapper {
+  width: 100%;
+}
+
+.file-upload-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem;
+  background: var(--input-bg);
+  border: 2px dashed var(--border-color);
+  border-radius: 1rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  font-weight: 500;
+}
+
+.file-upload-label:hover {
+  background: var(--input-bg-hover);
+  border-color: var(--accent-color);
+}
+
+.file-upload-label svg {
+  color: var(--accent-color);
+}
+
+/* PDF EXPORT OVERRIDES */
+.pdf-export-mode, .pdf-export-mode * {
+  color: black !important;
+  background-color: white !important;
 }
