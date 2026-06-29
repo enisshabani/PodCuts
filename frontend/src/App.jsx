@@ -188,24 +188,10 @@ function App() {
   return (
     <div className="app-container">
       
-      <header className="header" style={{ position: 'relative' }}>
+      <header className="header">
         <button 
           onClick={() => setIsDarkMode(!isDarkMode)}
-          style={{
-            position: 'absolute',
-            right: '0',
-            top: '0',
-            background: 'var(--surface-color)',
-            border: '1px solid var(--border-color)',
-            color: 'var(--text-primary)',
-            padding: '0.5rem 1rem',
-            borderRadius: '0.5rem',
-            cursor: 'pointer',
-            fontWeight: '600',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}
+          className="dark-mode-btn"
         >
           {isDarkMode ? (
             <>
@@ -239,7 +225,7 @@ function App() {
         <div className="top-section">
           <div className="top-left">
             <section className="input-section glass-panel">
-              <div className="tabs" style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+              <div className="tabs">
                 <button 
                   className={`copy-btn ${inputType === 'youtube' ? 'active' : ''}`}
                   style={{ flex: 1, justifyContent: 'center', background: inputType === 'youtube' ? 'var(--accent-hover)' : '', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
@@ -391,7 +377,7 @@ function App() {
             <div className="summary-card glass-panel">
               <div className="summary-header">
                 <h2>AI Summary</h2>
-                <div className="export-controls" style={{ display: 'flex', gap: '0.5rem' }}>
+                <div className="export-controls">
                   <button className="copy-btn" onClick={exportPDF}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                     PDF
