@@ -334,8 +334,8 @@
 /* RESPONSIVENESS FIXES */
 .dark-mode-btn {
   position: absolute;
-  right: 0;
-  top: 0;
+  right: 2rem;
+  top: 2rem;
   background: var(--surface-color);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
