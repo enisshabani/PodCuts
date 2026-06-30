@@ -53,6 +53,8 @@ def format_timestamp(seconds: float) -> str:
     s = int(seconds % 60)
     return f"[{m:02d}:{s:02d}]"
 
+from yt_dlp.networking.impersonate import ImpersonateTarget
+
 def fetch_transcript_text(video_id: str) -> str:
     try:
         url = f"https://www.youtube.com/watch?v={video_id}"
@@ -62,7 +64,7 @@ def fetch_transcript_text(video_id: str) -> str:
             'writeautomaticsub': True,
             'subtitleslangs': ['all'],
             'quiet': True,
-            'impersonate': 'chrome',
+            'impersonate': ImpersonateTarget(client='chrome'),
             'extractor_args': {'youtube': {'player_client': ['android', 'ios'], 'client': ['android', 'ios']}}
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
