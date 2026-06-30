@@ -62,7 +62,7 @@ def fetch_transcript_text(video_id: str) -> str:
             'writeautomaticsub': True,
             'subtitleslangs': ['all'],
             'quiet': True,
-            'extractor_args': {'youtube': {'player_client': ['android', 'web'], 'client': ['android', 'web']}}
+            'extractor_args': {'youtube': {'player_client': ['android', 'ios'], 'client': ['android', 'ios']}}
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
