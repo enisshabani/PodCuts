@@ -12,5 +12,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy source code
 COPY . .
 
-# Run uvicorn on port 8080 (Cloud Run default)
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+# Run uvicorn on the port provided by the environment (Railway/Cloud Run)
+CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8080}
