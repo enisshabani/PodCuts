@@ -26,7 +26,7 @@ app.add_middleware(
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-if not GEMINI_API_KEY or GEMINI_API_KEY == "    ":
+if not GEMINI_API_KEY or GEMINI_API_KEY == "AQ.Ab8RN6LPk53Kgro2s_V7XzJ1ORL0nHnBxDOHFAVG-oZ3XSx0-g":
     print("WARNING: GEMINI_API_KEY is not set or is still the default value.")
 
 client = genai.Client(api_key=GEMINI_API_KEY)
